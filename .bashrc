@@ -137,7 +137,7 @@ _create_shared_note() {
     cd "shared_notes"
     local filename="$(date +%Y%m%d)_$1.md"
     touch $filename
-    $_TYPORA_PATH $filename
+    nohup $_TYPORA_PATH $filename &
 }
 
 _sync_shared_directories() {
