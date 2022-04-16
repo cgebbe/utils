@@ -10,7 +10,6 @@ PROMPT_COMMAND='history -a'
 # -u = raise error for Unset variables
 alias _trace='trap "set +xu" RETURN; set -xu'
 
-
 # ==================================================
 # GIT
 # ==================================================
@@ -29,7 +28,7 @@ gdiff() {
     # --color-moved-ws=allow-indentation-change \
 }
 
-gsync () {
+gsync() {
     _trace
     cd $1
     gwip
@@ -50,7 +49,7 @@ git config --global color.diff.meta "black yellow italic"
 # ==================================================
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     alias vact="source ./venv/bin/activate"
-    elif [[ "$OSTYPE" == "msys" ]]; then
+elif [[ "$OSTYPE" == "msys" ]]; then
     # happpens with git bash under windows
     # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
     alias vact='source ./venv/Scripts/activate'
@@ -78,12 +77,11 @@ _pip_install() {
     pip-sync requirements.txt
 }
 
-
 # ==================================================
 # QUICK OPEN
 # ==================================================
 # source the .env file in the parent directory
-_SHARED_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )";
+_SHARED_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
 source ${_SHARED_DIR}/utils/.env
 
 # Assert that the following variables are defined
@@ -95,7 +93,7 @@ set -xu
 : "$_SANDBOX_DIR"
 set +xu
 
-_ide () {
+_ide() {
     # opens IDE at current location
     # & opens command in background (otherwise could not trigger next commands).
     # nohup keeps program open when exiting.
@@ -106,20 +104,19 @@ _ide () {
 _create_sandbox() {
     _trace
     dst_dir=${_SANDBOX_DIR}/"$(date '+%Y%m%d')_$1"
-    
+
     echo "Which project template do you want?"
     select dirname in "project_template_pycharm" "project_template_vscode"; do
         src_dir="${_SHARED_DIR}/utils/${dirname}"
-        
+
         cp -r $src_dir $dst_dir
         cd $dst_dir
         _ide
         _create_venv
-        
+
         break
     done
 }
-
 
 _create_shared_note() {
     _trace
