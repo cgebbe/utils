@@ -12,19 +12,27 @@ python -m pip install --upgrade pip setuptools wheel
 "
 
 # QUICK OPEN
-# & is used to open in background (otherwise could not trigger next commands).
-# nohup is used to keep programs open when exiting.
+source .env
 _startday() {
-    nohup code /mnt/sda1/files/notes &
-    nohup /home/cgebbe/pycharm_professional_2020.2/bin/pycharm.sh &
-    nohup /usr/bin/google-chrome-stable %U &
+    set -xu
+    # & opens in background (otherwise could not trigger next command)
+    # nohup keeps programs open when exiting 
+    for cmd in $START_COMMANDS; do
+        nohup $cmd &
+    done
+    set +xu
     exit
 }
 
+_sync_shared_folders() {
+    for dir in $SYNC_DIRECTORIES; do
+        _gsync $dir
+    done
+}
 
-_synchronize_directory () {
-    # -x = prints command to be eXecuted
-    # -u = raises error if a variable is Unset
+_gsync () {
+    # -x = prints command to be e(X)ecuted
+    # -u = raises error if a variable is (U)nset
     set -xu
     cd $1
     gwip
