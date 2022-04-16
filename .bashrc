@@ -78,20 +78,24 @@ _pip_install() {
 }
 
 # ==================================================
+#
+# ==================================================
+
+# ==================================================
 # QUICK OPEN
 # ==================================================
 # source the .env file in the parent directory
 _SHARED_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
 source ${_SHARED_DIR}/utils/.env
 
-# Assert that the following variables are defined
+# Assert that the following variables are defined in .env
 # see https://unix.stackexchange.com/a/228333/309309
-set -xu
+set -u
 : "$_IDE_PATH"
 : "$_TYPORA_PATH"
 : "$_START_COMMANDS"
 : "$_SANDBOX_DIR"
-set +xu
+set +u
 
 _ide() {
     # opens IDE at current location
@@ -101,13 +105,22 @@ _ide() {
     nohup $_IDE_PATH . >/dev/null 2>&1 &
 }
 
+_run_python_script() {
+    local script_path="${_SHARED_DIR}/utils/python_scripts"
+    select script_name in $(ls ${script_path}); do
+        local path=${script_path}/${script_name}
+        python $path "$@"
+        break
+    done
+}
+
 _create_sandbox() {
     _trace
-    dst_dir=${_SANDBOX_DIR}/"$(date '+%Y%m%d')_$1"
+    local dst_dir=${_SANDBOX_DIR}/"$(date '+%Y%m%d')_$1"
 
     echo "Which project template do you want?"
     select dirname in "project_template_pycharm" "project_template_vscode"; do
-        src_dir="${_SHARED_DIR}/utils/${dirname}"
+        local src_dir="${_SHARED_DIR}/utils/${dirname}"
 
         cp -r $src_dir $dst_dir
         cd $dst_dir
@@ -122,7 +135,7 @@ _create_shared_note() {
     _trace
     cd $_SHARED_DIR
     cd "shared_notes"
-    filename="$(date +%Y%m%d)_$1.md"
+    local filename="$(date +%Y%m%d)_$1.md"
     touch $filename
     $_TYPORA_PATH $filename
 }
