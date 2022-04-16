@@ -12,7 +12,9 @@ python -m pip install --upgrade pip setuptools wheel
 "
 
 # QUICK OPEN
+# TODO: get parent folder
 source .env
+
 _startday() {
     set -xu
     # & opens in background (otherwise could not trigger next command)
@@ -20,14 +22,24 @@ _startday() {
     for cmd in $START_COMMANDS; do
         nohup $cmd &
     done
+    _sync_shared_directories
     set +xu
     exit
 }
 
-_sync_shared_folders() {
+_sync_shared_directories() {
     for dir in $SYNC_DIRECTORIES; do
         _gsync $dir
     done
+}
+
+_create_shared_note() {
+    set -xu
+    cd $SHARED_NOTES_PATH
+    filename="$(date +%Y%m%d_%H%M%S)_$1.md"
+    touch $filename
+    $TYPORA $filename
+    set +xu
 }
 
 _gsync () {
