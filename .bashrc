@@ -4,6 +4,13 @@
 # make git bash save history - from https://stackoverflow.com/a/10901227/2135504
 PROMPT_COMMAND='history -a'
 
+# Function wrapper to debug functions
+# https://unix.stackexchange.com/a/699265/309309
+# -x = print command to be eXecuted
+# -u = raise error for Unset variables
+alias _trace='trap "set +xu" RETURN; set -xu'
+
+
 # ==================================================
 # GIT
 # ==================================================
@@ -23,14 +30,11 @@ gdiff() {
 }
 
 gsync () {
-    # -x = prints command to be e(X)ecuted
-    # -u = raises error if a variable is (U)nset
-    set -xu
+    _trace
     cd $1
     gwip
     git pull
     git push
-    set +xu
 }
 
 # config
@@ -46,7 +50,7 @@ git config --global color.diff.meta "black yellow italic"
 # ==================================================
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     alias vact="source ./venv/bin/activate"
-elif [[ "$OSTYPE" == "msys" ]]; then
+    elif [[ "$OSTYPE" == "msys" ]]; then
     # happpens with git bash under windows
     # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
     alias vact='source ./venv/Scripts/activate'
@@ -82,7 +86,7 @@ _pip_install() {
 _SHARED_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )";
 source ${_SHARED_DIR}/utils/.env
 
-# ASSERT THAT THE FOLLOWING VARIABLES ARE DEFINED
+# Assert that the following variables are defined
 # see https://unix.stackexchange.com/a/228333/309309
 set -xu
 : "$_IDE_PATH"
@@ -99,57 +103,46 @@ _ide () {
     nohup $_IDE_PATH . >/dev/null 2>&1 &
 }
 
-_startday() {
-    set -xu
-    # & opens in background (otherwise could not trigger next command)
-    # nohup keeps programs open when exiting 
-    for cmd in $START_COMMANDS; do
-        nohup $cmd &
-    done
-    _sync_shared_directories
-    set +xu
-    exit
-}
-
 _create_sandbox() {
-    set -xu
-    cd ${_SANDBOX_DIR}
-    dirname="$(date '+%Y%m%d')_$1"
-    echo $dirname
-    mkdir ${dirname}
-    cd ${dirname}
-
-    cp ${_PROJECT_TEMPLATE_DIR}/* .
-    _ide
-    _create_venv
-    set +xu
+    _trace
+    dst_dir=${_SANDBOX_DIR}/"$(date '+%Y%m%d')_$1"
+    
+    echo "Which project template do you want?"
+    select dirname in "project_template_pycharm" "project_template_vscode"; do
+        src_dir="${_SHARED_DIR}/utils/${dirname}"
+        
+        cp -r $src_dir $dst_dir
+        cd $dst_dir
+        _ide
+        _create_venv
+        
+        break
+    done
 }
+
 
 _create_shared_note() {
-    set -xu
+    _trace
     cd $_SHARED_DIR
     cd "shared_notes"
-    filename="$(date +%Y%m%d_%H%M%S)_$1.md"
+    filename="$(date +%Y%m%d)_$1.md"
     touch $filename
     $_TYPORA_PATH $filename
-    set +xu
 }
 
 _sync_shared_directories() {
-    set -xu
-    _gsync $_SHARED_DIR/utils
-    _gsync $_SHARED_DIR/shared_notes
-    set +xu
+    _trace
+    gsync $_SHARED_DIR/utils
+    gsync $_SHARED_DIR/shared_notes
 }
 
 _startday() {
+    _trace
     _sync_shared_directories
-    set -xu
     # & opens in background (otherwise could not trigger next command)
-    # nohup keeps programs open when exiting 
+    # nohup keeps programs open when exiting
     for cmd in $START_COMMANDS; do
         nohup $cmd &
     done
-    set +xu
     exit
 }
