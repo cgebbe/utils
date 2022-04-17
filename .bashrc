@@ -92,7 +92,7 @@ source ${_SHARED_DIR}/utils/.env
 # see https://unix.stackexchange.com/a/228333/309309
 set -u
 : "$_IDE_PATH"
-: "$_TYPORA_PATH"
+: "$_MARKDOWN_PATH"
 : "$_START_COMMANDS"
 : "$_SANDBOX_DIR"
 set +u
@@ -137,7 +137,7 @@ _create_shared_note() {
     cd "shared_notes"
     local filename="$(date +%Y%m%d)_$1.md"
     touch $filename
-    nohup $_TYPORA_PATH $filename &
+    nohup $_MARKDOWN_PATH $filename &
 }
 
 _sync_shared_directories() {
