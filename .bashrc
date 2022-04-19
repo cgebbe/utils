@@ -9,6 +9,13 @@ PROMPT_COMMAND='history -a'
 # -x = print command to be eXecuted
 # -u = raise error for Unset variables
 alias _trace='trap "set +xu" RETURN; set -xu'
+alias _ensure_variables_exist='trap "set +u" RETURN; set -u'
+
+# see https://stackoverflow.com/a/16957078/2135504
+_find_text() {
+    _ensure_variables_exist
+    grep -rnw $1 --include=\*.py -e $2
+}
 
 # ==================================================
 # GIT
@@ -62,6 +69,9 @@ fi
 # run pytest easily in pycharm with git bash
 # https://stackoverflow.com/q/32597209/2135504
 alias ptest="winpty pytest -vv --instafail"
+
+# see https://superuser.com/a/304489/1010479
+alias _watch_pytest="when-changed -rsv tests/ -c pytest tests/ -vv --instafail -k XXX"
 
 _create_venv() {
     deactivate
@@ -151,7 +161,7 @@ _startday() {
     _sync_shared_directories
     # & opens in background (otherwise could not trigger next command)
     # nohup keeps programs open when exiting
-    for cmd in $START_COMMANDS; do
+    for cmd in $_START_COMMANDS; do
         nohup $cmd &
     done
     exit
