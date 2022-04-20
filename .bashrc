@@ -11,6 +11,15 @@ PROMPT_COMMAND='history -a'
 alias _trace='trap "set +xu" RETURN; set -xu'
 alias _ensure_variables_exist='trap "set +u" RETURN; set -u'
 
+# see https://stackoverflow.com/a/10408906/2135504
+_start_in_background() {
+    _ensure_variables_exist
+    # & opens command in background (otherwise could not trigger next commands).
+    # nohup keeps program open when exiting.
+    # >/dev/null is used to avoid creating nohup.out
+     nohup $1 >/dev/null 2>&1 &
+}
+
 # see https://stackoverflow.com/a/16957078/2135504
 _find_text() {
     _ensure_variables_exist
@@ -109,10 +118,8 @@ set +u
 
 _ide() {
     # opens IDE at current location
-    # & opens command in background (otherwise could not trigger next commands).
-    # nohup keeps program open when exiting.
-    # >/dev/null is used to ???
-    nohup $_IDE_PATH . >/dev/null 2>&1 &
+    _ensure_variables_exist
+    _start_in_background "$_IDE_PATH $1"
 }
 
 _run_python_script() {
@@ -134,7 +141,7 @@ _create_sandbox() {
 
         cp -r $src_dir $dst_dir
         cd $dst_dir
-        _ide
+        _ide .
         _create_venv
 
         break
@@ -147,7 +154,7 @@ _create_shared_note() {
     cd "shared_notes"
     local filename="$(date +%Y%m%d)_$1.md"
     touch $filename
-    nohup $_MARKDOWN_PATH $filename &
+    _start_in_background "$_MARKDOWN_PATH $filename"
 }
 
 _sync_shared_directories() {
@@ -163,7 +170,7 @@ _startday() {
     # nohup keeps programs open when exiting
     for cmd in $_START_COMMANDS; do
         echo $cmd
-        nohup $cmd &
+        _start_in_background "$cmd"
     done
     exit
 }
