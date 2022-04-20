@@ -162,6 +162,7 @@ _startday() {
     # & opens in background (otherwise could not trigger next command)
     # nohup keeps programs open when exiting
     for cmd in $_START_COMMANDS; do
+        echo $cmd
         nohup $cmd &
     done
     exit
