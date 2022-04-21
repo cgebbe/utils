@@ -14,10 +14,10 @@ alias _ensure_variables_exist='trap "set +u" RETURN; set -u'
 # see https://stackoverflow.com/a/10408906/2135504
 _start_in_background() {
     _ensure_variables_exist
-    # & opens command in background (otherwise could not trigger next commands).
-    # nohup keeps program open when exiting.
+    # & opens command in background and doesn't block terminal.
+    # nohup keeps program open when exiting terminal.
     # >/dev/null is used to avoid creating nohup.out
-     nohup $1 >/dev/null 2>&1 &
+    nohup $1 >/dev/null 2>&1 &
 }
 
 # see https://stackoverflow.com/a/16957078/2135504
@@ -63,17 +63,22 @@ git config --global color.diff.meta "black yellow italic"
 # ==================================================
 # PYTHON
 # ==================================================
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    alias vact="source ./venv/bin/activate"
-elif [[ "$OSTYPE" == "msys" ]]; then
-    # happpens with git bash under windows
-    # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
-    alias vact='source ./venv/Scripts/activate'
-else
-    # see https://stackoverflow.com/a/8597411/2135504
-    echo "Error, unknown OS!" 1>&2
-    exit 1
-fi
+
+vact() {
+    deactivate
+
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        alias vact="source ./venv/bin/activate"
+    elif [[ "$OSTYPE" == "msys" ]]; then
+        # happpens with git bash under windows
+        # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+        alias vact='source ./venv/Scripts/activate'
+    else
+        # see https://stackoverflow.com/a/8597411/2135504
+        echo "Error, unknown OS!" 1>&2
+        exit 1
+    fi
+}
 
 # run pytest easily in pycharm with git bash
 # https://stackoverflow.com/q/32597209/2135504
