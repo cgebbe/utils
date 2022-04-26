@@ -169,13 +169,13 @@ _sync_shared_directories() {
 }
 
 _startday() {
-    _trace
-    _sync_shared_directories
     # & opens in background (otherwise could not trigger next command)
     # nohup keeps programs open when exiting
     for cmd in $_START_COMMANDS; do
         echo $cmd
         _start_in_background "$cmd"
     done
+    _trace
+    _sync_shared_directories
     exit
 }
