@@ -68,11 +68,11 @@ vact() {
     deactivate
 
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        alias vact="source ./venv/bin/activate"
+        source ./venv/bin/activate
     elif [[ "$OSTYPE" == "msys" ]]; then
         # happpens with git bash under windows
         # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
-        alias vact='source ./venv/Scripts/activate'
+        source ./venv/Scripts/activate
     else
         # see https://stackoverflow.com/a/8597411/2135504
         echo "Error, unknown OS!" 1>&2
