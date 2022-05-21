@@ -31,6 +31,7 @@ _find_text() {
 # ==================================================
 alias glog='git log --decorate --oneline --graph --abbrev=8'
 alias grebase='git fetch --all; git rebase origin/master -i --autosquash'
+alias gsquash='git rebase -i --autosquash $(git merge-base HEAD origin/master)'
 alias gamend="git commit --amend --no-edit"
 alias gwip="git add . && git commit -m 'WIP from $(date +%Y%m%d_%H%M%S)'"
 
