@@ -1,28 +1,30 @@
+#!/usr/bin/env bash
 # ==================================================
 # BASH
 # ==================================================
 # make git bash save history - from https://stackoverflow.com/a/10901227/2135504
 PROMPT_COMMAND='history -a'
 
+# throw erros upon undefined variables
+set -u
+
 # Function wrapper to debug functions
 # https://unix.stackexchange.com/a/699265/309309
 # -x = print command to be eXecuted
 # -u = raise error for Unset variables
-alias _trace='trap "set +xu" RETURN; set -xu'
-alias _ensure_variables_exist='trap "set +u" RETURN; set -u'
+# alias _trace='trap "set +xu" RETURN; set -xu'
+# alias _ensure_variables_exist='trap "set +u" RETURN; set -u'
 
 # see https://stackoverflow.com/a/10408906/2135504
 _start_in_background() {
-    _ensure_variables_exist
     # & opens command in background and doesn't block terminal.
     # nohup keeps program open when exiting terminal.
     # >/dev/null is used to avoid creating nohup.out
-    nohup $1 >/dev/null 2>&1 &
+    nohup $1 >/dev/null 2>&1 &!
 }
 
 # see https://stackoverflow.com/a/16957078/2135504
 _find_text() {
-    _ensure_variables_exist
     grep -rnw $1 --include=\*.py -e $2
 }
 
@@ -46,11 +48,12 @@ gdiff() {
 }
 
 gsync() {
-    _trace
+    set -x
     cd $1
     gwip
     git pull
     git push
+    set +x
 }
 
 # config
@@ -109,8 +112,13 @@ _pip_install() {
 # ==================================================
 # QUICK OPEN
 # ==================================================
+
+# get (absolute) parent path of this script
+# https://stackoverflow.com/a/246128/2135504
+_UTILS_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
+_SHARED_DIR=$(dirname ${_UTILS_DIR})
+
 # source the .env file in the parent directory
-_SHARED_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
 source ${_SHARED_DIR}/utils/.env
 
 # Assert that the following variables are defined in .env
@@ -124,7 +132,6 @@ set +u
 
 _ide() {
     # opens IDE at current location
-    _ensure_variables_exist
     _start_in_background "$_IDE_PATH $1"
 }
 
@@ -138,7 +145,7 @@ _run_python_script() {
 }
 
 _create_sandbox() {
-    _trace
+    set -x
     local dst_dir=${_SANDBOX_DIR}/"$(date '+%Y%m%d')_$1"
 
     echo "Which project template do you want?"
@@ -152,21 +159,24 @@ _create_sandbox() {
 
         break
     done
+    set +x
 }
 
 _create_shared_note() {
-    _trace
+    set -x
     cd $_SHARED_DIR
     cd "shared_notes"
     local filename="$(date +%Y%m%d)_$1.md"
     touch $filename
     _start_in_background "$_MARKDOWN_PATH $filename"
+    set +x
 }
 
 _sync_shared_directories() {
-    _trace
+    set -x
     gsync $_SHARED_DIR/utils
     gsync $_SHARED_DIR/shared_notes
+    set +x
 }
 
 _startday() {
@@ -176,7 +186,6 @@ _startday() {
         echo $cmd
         _start_in_background "$cmd"
     done
-    _trace
     _sync_shared_directories
     exit
 }
