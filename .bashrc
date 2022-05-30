@@ -26,6 +26,9 @@ _find_text() {
     grep -rnw $1 --include=\*.py -e $2
 }
 
+# How to split any commit:
+# https://emmanuelbernard.com/blog/2014/04/14/split-a-commit-in-two-with-git/
+
 # ==================================================
 # GIT
 # ==================================================
